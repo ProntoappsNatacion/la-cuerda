@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RestoApp — Arquitectura Completa v1.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #7c6dfa;
+    --accent2: #3ecfb0;
+    --accent3: #f5a623;
+    --accent4: #ff6b6b;
+    --text: #e8e8f0;
+    --muted: #888899;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 48px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 15px; }
+  .meta { margin-top: 16px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .meta-item { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .meta-item span { color: var(--accent2); }
+
+  /* SECTIONS */
+  h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: var(--mono);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  section { margin-bottom: 56px; }
+
+  /* STACK CARDS */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stack-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .stack-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .stack-name { font-size: 15px; font-weight: 600; color: var(--accent2); margin-bottom: 4px; }
+  .stack-desc { font-size: 12px; color: var(--muted); }
+
+  /* DATA SOURCE CARDS */
+  .datasource-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .datasource-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .datasource-card.olaclick { border-top: 3px solid var(--accent2); }
+  .datasource-card.rappi { border-top: 3px solid var(--accent3); }
+  .ds-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .field-list { list-style: none; }
+  .field-list li {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .field-list li:last-child { border-bottom: none; }
+  .field-name { color: var(--accent2); }
+  .field-desc { color: var(--muted); text-align: right; }
+
+  /* MODULES */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .module-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+  }
+  .module-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--border);
+    position: absolute;
+    top: 12px;
+    right: 14px;
+  }
+  .module-icon { font-size: 20px; margin-bottom: 8px; }
+  .module-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .module-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .module-card.p1 { border-left: 3px solid var(--accent4); }
+  .module-card.p2 { border-left: 3px solid var(--accent3); }
+  .module-card.p3 { border-left: 3px solid var(--accent); }
+
+  /* DB TABLES */
+  .db-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .db-table {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .db-header {
+    background: var(--bg3);
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    border-bottom: 1px solid var(--border);
+  }
+  .db-fields { padding: 10px 14px; }
+  .db-field {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(42,42,58,0.5);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .db-field:last-child { border-bottom: none; }
+  .db-field-name { color: var(--text); }
+  .db-field-type { color: var(--muted); }
+  .db-field-note { color: var(--accent3); font-size: 10px; }
+
+  /* SPRINT */
+  .sprint-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .sprint-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .sprint-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sprint-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .d1 { background: var(--accent4); }
+  .d2 { background: var(--accent2); }
+  .task-list { list-style: none; }
+  .task-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .task-list li:last-child { border-bottom: none; }
+  .task-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 20px;
+    margin-top: 2px;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+  .code-block .kw { color: var(--accent); }
+  .code-block .str { color: var(--accent2); }
+  .code-block .cmt { color: var(--muted); }
+  .code-block .num { color: var(--accent3); }
+  .code-block .type { color: #c9a0f5; }
+
+  /* FLOW */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .flow-arrow {
+    color: var(--muted);
+    padding: 0 8px;
+    font-size: 14px;
+  }
+  .flow-step.teal { border-color: var(--accent2); color: var(--accent2); }
+  .flow-step.amber { border-color: var(--accent3); color: var(--accent3); }
+  .flow-step.purple { border-color: var(--accent); color: var(--accent); }
+  .flow-step.red { border-color: var(--accent4); color: var(--accent4); }
+
+  /* INSIGHT BOX */
+  .insight {
+    background: rgba(124,109,250,0.08);
+    border: 1px solid rgba(124,109,250,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .insight p { font-size: 13px; color: var(--muted); }
+  .insight strong { color: var(--text); }
+
+  .insight.amber {
+    background: rgba(245,166,35,0.08);
+    border-color: rgba(245,166,35,0.3);
+  }
+  .insight.amber .insight-label { color: var(--accent3); }
+
+  .insight.teal {
+    background: rgba(62,207,176,0.08);
+    border-color: rgba(62,207,176,0.3);
+  }
+  .insight.teal .insight-label { color: var(--accent2); }
+
+  /* PROMPT BOX */
+  .prompt-box {
+    background: var(--bg3);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .prompt-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .prompt-text {
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--muted);
+    white-space: pre-wrap;
+  }
+  .prompt-text strong { color: var(--text); }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .datasource-grid, .sprint-grid, .db-grid { grid-template-columns: 1fr; }
+    .modules-grid { grid-template-columns: 1fr 1fr; }
+    body { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">ARQUITECTURA DE SOFTWARE</div>
+  <h1>RestoApp — Blueprint Completo</h1>
+  <p class="subtitle">Documento técnico de arquitectura · Versión 1.0 · Para entrega en 48 horas</p>
+  <div class="meta">
+    <div class="meta-item">Cliente: <span>RestoBar (La Cuerda)</span></div>
+    <div class="meta-item">Stack: <span>React + Supabase + Vercel</span></div>
+    <div class="meta-item">Canales: <span>POS Directo + OlaClick + Rappi</span></div>
+    <div class="meta-item">Estado: <span>Listo para Claude Code</span></div>
+  </div>
+</div>
+
+<!-- CONTEXT -->
+<section>
+  <h2>01 · Contexto del negocio</h2>
+  <div class="insight teal">
+    <div class="insight-label">Datos reales de los archivos analizados</div>
+    <p>
+      <strong>OlaClick (abril 2026):</strong> 47 pedidos · $1.891.600 facturado · $1.576.600 en productos · ticket promedio $40.247 · domingo es el día más vendido ($558.400) · miércoles segundo ($453.400).<br><br>
+      <strong>Rappi (4–10 mayo):</strong> 37 órdenes · $1.158.500 bruto · -$170.400 comisión 20% · -$63.250 tarifa plataforma · neto real ~$924.850 · el sistema los paga semana vencida.<br><br>
+      <strong>Producto estrella:</strong> Tres Leches (25 unidades vendidas abril) seguido de Porción Tradicional Vasca (14 unidades).
+    </p>
+  </div>
+</section>
+
+<!-- STACK -->
+<section>
+  <h2>02 · Stack tecnológico</h2>
+  <div class="stack-grid">
+    <div class="stack-card">
+      <div class="stack-label">Frontend</div>
+      <div class="stack-name">React + Vite</div>
+      <div class="stack-desc">Tailwind CSS · React Router · SheetJS para parsear xlsx en el cliente</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">Base de datos + Auth</div>
+      <div class="stack-name">Supabase</div>
+      <div class="stack-desc">PostgreSQL · Auth con email · RLS por restaurant_id · Realtime para alertas</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">Deploy frontend</div>
+      <div class="stack-name">Vercel</div>
+      <div class="stack-desc">CI/CD automático desde GitHub · dominio propio · SSL gratis</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">Gráficas</div>
+      <div class="stack-name">Recharts</div>
+      <div class="stack-desc">Barras, líneas, dona — 100% React, liviano y declarativo</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">Parseo de archivos</div>
+      <div class="stack-name">SheetJS (xlsx)</div>
+      <div class="stack-desc">Lee OlaClick y Rappi directo en el browser, sin servidor</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">PDF / Reportes</div>
+      <div class="stack-name">jsPDF</div>
+      <div class="stack-desc">Arqueos de caja y reportes en PDF desde el cliente</div>
+    </div>
+  </div>
+
+  <div class="insight amber">
+    <div class="insight-label">Decisión arquitectónica clave</div>
+    <p>El parseo de xlsx se hace <strong>100% en el navegador con SheetJS</strong> — no se sube ningún archivo a ningún servidor. El sistema extrae los datos y los guarda en Supabase. Rápido, seguro, sin costos de storage.</p>
+  </div>
+</section>
+
+<!-- DATA SOURCES -->
+<section>
+  <h2>03 · Fuentes de datos externas (archivos xlsx)</h2>
+  <div class="datasource-grid">
+    <div class="datasource-card olaclick">
+      <div class="ds-title">📄 OlaClick — Hoja: <code>Productos</code></div>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Subida diaria o periódica. La hoja PRODUCTOS es la clave: tiene el acumulado de unidades y dinero por producto.</p>
+      <ul class="field-list">
+        <li><span class="field-name">Nombre de la variante de producto</span><span class="field-desc">→ mapear a productos RestoApp</span></li>
+        <li><span class="field-name">Cantidad vendida</span><span class="field-desc">→ sumar a estadísticas</span></li>
+        <li><span class="field-name">Total vendido</span><span class="field-desc">→ ingresos del período</span></li>
+        <li><span class="field-name">Ganancia por unidad</span><span class="field-desc">→ margen por producto</span></li>
+        <li><span class="field-name">Categoría</span><span class="field-desc">→ filtros estadísticos</span></li>
+        <li><span class="field-name">Hoja Pedidos → Fecha</span><span class="field-desc">→ ventas por día</span></li>
+        <li><span class="field-name">Hoja Pagos → Método pago</span><span class="field-desc">→ cuadre de caja</span></li>
+      </ul>
+    </div>
+    <div class="datasource-card rappi">
+      <div class="ds-title">📄 Rappi — Hoja: <code>Detalle</code></div>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Subida semanal (pago semana vencida). Uso: SOLO estadístico. Los descuentos → gastos automáticos.</p>
+      <ul class="field-list">
+        <li><span class="field-name">Venta Bruta</span><span class="field-desc">→ ingreso bruto Rappi</span></li>
+        <li><span class="field-name">Descuento asumido por aliado (20%)</span><span class="field-desc">→ gasto automático</span></li>
+        <li><span class="field-name">Uso y alquiler plataforma Rappi</span><span class="field-desc">→ gasto automático</span></li>
+        <li><span class="field-name">IVA + Retefuente Rappi</span><span class="field-desc">→ gasto fiscal</span></li>
+        <li><span class="field-name">Fecha de creación orden</span><span class="field-desc">→ día más vendido</span></li>
+        <li><span class="field-name">Estado de la orden</span><span class="field-desc">→ filtrar canceladas</span></li>
+        <li><span class="field-name">Valor Neto final</span><span class="field-desc">→ lo que realmente paga Rappi</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;">
+    <h3 style="margin-bottom:12px;">Flujo de importación OlaClick</h3>
+    <div class="flow-row">
+      <div class="flow-step teal">Usuario sube .xlsx</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">SheetJS lee hoja "Productos"</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step amber">Mapea nombre → producto local</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step purple">Inserta olaclick_imports en Supabase</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step teal">Estadísticas se actualizan</div>
+    </div>
+    <h3 style="margin-top:16px; margin-bottom:12px;">Flujo de importación Rappi</h3>
+    <div class="flow-row">
+      <div class="flow-step teal">Usuario sube .xlsx</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">SheetJS lee hoja "Detalle"</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step amber">Calcula neto y descuentos</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step red">Crea gastos automáticos + crédito pendiente</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step teal">Reporte Rappi separado</div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section>
+  <h2>04 · Módulos de la aplicación</h2>
+  <div style="margin-bottom:12px; font-size:12px; color:var(--muted);">
+    <span style="color:var(--accent4);">●</span> Prioridad 1 — Día 1 &nbsp;
+    <span style="color:var(--accent3);">●</span> Prioridad 2 — Día 1 tarde &nbsp;
+    <span style="color:var(--accent);">●</span> Prioridad 3 — Día 2
+  </div>
+  <div class="modules-grid">
+    <div class="module-card p1">
+      <div class="module-num">01</div>
+      <div class="module-icon">🏠</div>
+      <div class="module-name">Dashboard</div>
+      <div class="module-desc">Resumen unificado: OlaClick + POS + Rappi. Ventas hoy, mes, ganancias, gastos, alertas de inventario bajo.</div>
+    </div>
+    <div class="module-card p1">
+      <div class="module-num">02</div>
+      <div class="module-icon">🛒</div>
+      <div class="module-name">Punto de Venta (POS)</div>
+      <div class="module-desc">Tomar pedidos, seleccionar medios de pago configurables, clientes guardados, descuentos, crédito (Rappi). Descuenta inventario automáticamente.</div>
+    </div>
+    <div class="module-card p1">
+      <div class="module-num">03</div>
+      <div class="module-icon">📦</div>
+      <div class="module-name">Inventario</div>
+      <div class="module-desc">Ingredientes con unidades/gramaje. Sub-recetas. Alertas de bajo stock. Actualización automática al vender o producir.</div>
+    </div>
+    <div class="module-card p1">
+      <div class="module-num">04</div>
+      <div class="module-icon">👨‍🍳</div>
+      <div class="module-name">Recetas y Producción</div>
+      <div class="module-desc">Recetas con ingredientes y sub-recetas. Al producir: descuenta materia prima y sub-recetas. Costeo automático con alerta de variación de costo.</div>
+    </div>
+    <div class="module-card p2">
+      <div class="module-num">05</div>
+      <div class="module-icon">🧾</div>
+      <div class="module-name">Compras (Factura de Compra)</div>
+      <div class="module-desc">Dos modos: gasto simple o factura con ingredientes. La factura calcula costo/g, actualiza inventario, actualiza costo en recetas y notifica variación.</div>
+    </div>
+    <div class="module-card p2">
+      <div class="module-num">06</div>
+      <div class="module-icon">💰</div>
+      <div class="module-name">Finanzas</div>
+      <div class="module-desc">Ingresos, gastos por fondo, créditos Rappi (pendiente de cobro), cuadre de caja, saldo por fondo. Rappi paga semana vencida: cuenta como crédito hasta que se confirma.</div>
+    </div>
+    <div class="module-card p2">
+      <div class="module-num">07</div>
+      <div class="module-icon">📊</div>
+      <div class="module-name">Estadísticas</div>
+      <div class="module-desc">Resumen total (todos los canales). Ventas por producto, día de la semana más vendido, comparativo de canales. Gráficas de barras y líneas.</div>
+    </div>
+    <div class="module-card p2">
+      <div class="module-num">08</div>
+      <div class="module-icon">🚀</div>
+      <div class="module-name">Importar OlaClick</div>
+      <div class="module-desc">Sube xlsx de OlaClick. Lee hoja Productos: suma cantidades al historial, actualiza estadísticas, alimenta cuadre de caja con totales por método de pago.</div>
+    </div>
+    <div class="module-card p3">
+      <div class="module-num">09</div>
+      <div class="module-icon">🏍️</div>
+      <div class="module-name">Reporte Rappi</div>
+      <div class="module-desc">Panel separado. Importa xlsx Rappi: bruto, descuentos (→ gastos auto), neto, día más vendido. Crea deuda a crédito hasta confirmar pago.</div>
+    </div>
+    <div class="module-card p3">
+      <div class="module-num">10</div>
+      <div class="module-icon">📊</div>
+      <div class="module-name">Distribución de Ingresos</div>
+      <div class="module-desc">% del total de ventas a cada fondo (nómina, materia prima, ahorro, utilidad...). Visual en dona. Editable y guardable.</div>
+    </div>
+    <div class="module-card p3">
+      <div class="module-num">11</div>
+      <div class="module-icon">👥</div>
+      <div class="module-name">Clientes</div>
+      <div class="module-desc">Crear y buscar clientes: nombre, teléfono, dirección. Historial de pedidos. Se usan en POS y en órdenes a crédito.</div>
+    </div>
+    <div class="module-card p3">
+      <div class="module-num">12</div>
+      <div class="module-icon">💳</div>
+      <div class="module-name">Medios de Pago</div>
+      <div class="module-desc">Configurar medios: Efectivo, Transferencia, Nequi, Daviplata, etc. Se seleccionan en cada venta. Cuadre de caja por medio de pago.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DATABASE -->
+<section>
+  <h2>05 · Esquema de base de datos (Supabase / PostgreSQL)</h2>
+  <div class="db-grid">
+
+    <div class="db-table">
+      <div class="db-header">restaurants</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">name</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">owner_id</span><span class="db-field-type">uuid FK → auth.users</span></div>
+        <div class="db-field"><span class="db-field-name">timezone</span><span class="db-field-type">text</span><span class="db-field-note">América/Bogotá</span></div>
+        <div class="db-field"><span class="db-field-name">created_at</span><span class="db-field-type">timestamptz</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">products</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">name</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">category</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">price</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">cost</span><span class="db-field-type">numeric</span><span class="db-field-note">calculado de receta</span></div>
+        <div class="db-field"><span class="db-field-name">active</span><span class="db-field-type">boolean</span></div>
+        <div class="db-field"><span class="db-field-name">olaclick_name</span><span class="db-field-type">text</span><span class="db-field-note">mapeo xlsx</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">ingredients</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">name</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">unit</span><span class="db-field-type">text</span><span class="db-field-note">g, ml, unidad</span></div>
+        <div class="db-field"><span class="db-field-name">stock_current</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">stock_minimum</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">cost_per_unit</span><span class="db-field-type">numeric</span><span class="db-field-note">actualizado en compras</span></div>
+        <div class="db-field"><span class="db-field-name">cost_previous</span><span class="db-field-type">numeric</span><span class="db-field-note">para alerta de variación</span></div>
+        <div class="db-field"><span class="db-field-name">supplier</span><span class="db-field-type">text</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">recipes</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">product_id</span><span class="db-field-type">uuid FK → products</span></div>
+        <div class="db-field"><span class="db-field-name">is_sub_recipe</span><span class="db-field-type">boolean</span><span class="db-field-note">puede ser sub-receta</span></div>
+        <div class="db-field"><span class="db-field-name">name</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">yield_quantity</span><span class="db-field-type">numeric</span><span class="db-field-note">cuánto produce</span></div>
+        <div class="db-field"><span class="db-field-name">yield_unit</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">total_cost</span><span class="db-field-type">numeric</span><span class="db-field-note">calculado auto</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">recipe_ingredients</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">recipe_id</span><span class="db-field-type">uuid FK → recipes</span></div>
+        <div class="db-field"><span class="db-field-name">ingredient_id</span><span class="db-field-type">uuid FK → ingredients</span><span class="db-field-note">null si es sub-receta</span></div>
+        <div class="db-field"><span class="db-field-name">sub_recipe_id</span><span class="db-field-type">uuid FK → recipes</span><span class="db-field-note">null si es ingrediente</span></div>
+        <div class="db-field"><span class="db-field-name">quantity</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">unit</span><span class="db-field-type">text</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">sales</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">source</span><span class="db-field-type">text</span><span class="db-field-note">pos / olaclick / rappi</span></div>
+        <div class="db-field"><span class="db-field-name">customer_id</span><span class="db-field-type">uuid FK → customers</span><span class="db-field-note">nullable</span></div>
+        <div class="db-field"><span class="db-field-name">payment_method_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">total</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">is_credit</span><span class="db-field-type">boolean</span><span class="db-field-note">Rappi: semana vencida</span></div>
+        <div class="db-field"><span class="db-field-name">credit_paid_at</span><span class="db-field-type">timestamptz</span><span class="db-field-note">cuando se confirma pago</span></div>
+        <div class="db-field"><span class="db-field-name">sale_date</span><span class="db-field-type">date</span></div>
+        <div class="db-field"><span class="db-field-name">notes</span><span class="db-field-type">text</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">sale_items</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">sale_id</span><span class="db-field-type">uuid FK → sales</span></div>
+        <div class="db-field"><span class="db-field-name">product_id</span><span class="db-field-type">uuid FK → products</span></div>
+        <div class="db-field"><span class="db-field-name">product_name</span><span class="db-field-type">text</span><span class="db-field-note">snapshot precio</span></div>
+        <div class="db-field"><span class="db-field-name">quantity</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">unit_price</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">unit_cost</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">subtotal</span><span class="db-field-type">numeric</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">expenses</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">type</span><span class="db-field-type">text</span><span class="db-field-note">simple / purchase / rappi_fee</span></div>
+        <div class="db-field"><span class="db-field-name">description</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">amount</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">fund</span><span class="db-field-type">text</span><span class="db-field-note">fondo de donde sale</span></div>
+        <div class="db-field"><span class="db-field-name">expense_date</span><span class="db-field-type">date</span></div>
+        <div class="db-field"><span class="db-field-name">purchase_id</span><span class="db-field-type">uuid FK → purchases</span><span class="db-field-note">si es factura</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">purchases (Facturas de compra)</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">supplier</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">invoice_number</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">total_amount</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">purchase_date</span><span class="db-field-type">date</span></div>
+        <div class="db-field"><span class="db-field-name">fund</span><span class="db-field-type">text</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">purchase_items</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">purchase_id</span><span class="db-field-type">uuid FK → purchases</span></div>
+        <div class="db-field"><span class="db-field-name">ingredient_id</span><span class="db-field-type">uuid FK → ingredients</span></div>
+        <div class="db-field"><span class="db-field-name">quantity</span><span class="db-field-type">numeric</span><span class="db-field-note">cuánto compró</span></div>
+        <div class="db-field"><span class="db-field-name">unit</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">total_cost</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">cost_per_unit</span><span class="db-field-type">numeric</span><span class="db-field-note">calculado: total/qty</span></div>
+        <div class="db-field"><span class="db-field-name">prev_cost_per_unit</span><span class="db-field-type">numeric</span><span class="db-field-note">para alerta variación</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">olaclick_imports</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">file_name</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">period_start</span><span class="db-field-type">date</span></div>
+        <div class="db-field"><span class="db-field-name">period_end</span><span class="db-field-type">date</span></div>
+        <div class="db-field"><span class="db-field-name">total_sales</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">total_orders</span><span class="db-field-type">int</span></div>
+        <div class="db-field"><span class="db-field-name">raw_products_json</span><span class="db-field-type">jsonb</span><span class="db-field-note">copia de hoja Productos</span></div>
+        <div class="db-field"><span class="db-field-name">raw_payments_json</span><span class="db-field-type">jsonb</span><span class="db-field-note">copia de hoja Pagos</span></div>
+        <div class="db-field"><span class="db-field-name">imported_at</span><span class="db-field-type">timestamptz</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">rappi_imports</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">period_start / end</span><span class="db-field-type">date</span></div>
+        <div class="db-field"><span class="db-field-name">venta_bruta</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">comision_20pct</span><span class="db-field-type">numeric</span><span class="db-field-note">→ gasto auto</span></div>
+        <div class="db-field"><span class="db-field-name">tarifa_plataforma</span><span class="db-field-type">numeric</span><span class="db-field-note">→ gasto auto</span></div>
+        <div class="db-field"><span class="db-field-name">iva_retefuente</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">valor_neto</span><span class="db-field-type">numeric</span><span class="db-field-note">lo que paga Rappi</span></div>
+        <div class="db-field"><span class="db-field-name">total_orders</span><span class="db-field-type">int</span></div>
+        <div class="db-field"><span class="db-field-name">best_day_of_week</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">credit_sale_id</span><span class="db-field-type">uuid FK → sales</span><span class="db-field-note">venta a crédito creada</span></div>
+        <div class="db-field"><span class="db-field-name">paid_at</span><span class="db-field-type">timestamptz</span><span class="db-field-note">null hasta confirmar</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">customers</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">name</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">phone</span><span class="db-field-type">text</span></div>
+        <div class="db-field"><span class="db-field-name">address</span><span class="db-field-type">text</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">payment_methods</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">name</span><span class="db-field-type">text</span><span class="db-field-note">Efectivo, Nequi, etc.</span></div>
+        <div class="db-field"><span class="db-field-name">active</span><span class="db-field-type">boolean</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">income_distribution</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">fund_name</span><span class="db-field-type">text</span><span class="db-field-note">Materia Prima, Nómina…</span></div>
+        <div class="db-field"><span class="db-field-name">percentage</span><span class="db-field-type">numeric</span><span class="db-field-note">suma 100%</span></div>
+        <div class="db-field"><span class="db-field-name">color</span><span class="db-field-type">text</span></div>
+      </div>
+    </div>
+
+    <div class="db-table">
+      <div class="db-header">cash_registers (Arqueos)</div>
+      <div class="db-fields">
+        <div class="db-field"><span class="db-field-name">id</span><span class="db-field-type">uuid PK</span></div>
+        <div class="db-field"><span class="db-field-name">restaurant_id</span><span class="db-field-type">uuid FK</span></div>
+        <div class="db-field"><span class="db-field-name">register_date</span><span class="db-field-type">date</span></div>
+        <div class="db-field"><span class="db-field-name">opening_cash</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">closing_cash</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">sales_total</span><span class="db-field-type">numeric</span><span class="db-field-note">POS + OlaClick del día</span></div>
+        <div class="db-field"><span class="db-field-name">expenses_total</span><span class="db-field-type">numeric</span></div>
+        <div class="db-field"><span class="db-field-name">difference</span><span class="db-field-type">numeric</span><span class="db-field-note">sobrante/faltante</span></div>
+        <div class="db-field"><span class="db-field-name">notes</span><span class="db-field-type">text</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CRITICAL FLOWS -->
+<section>
+  <h2>06 · Flujos críticos — Lógica de negocio</h2>
+
+  <h3 style="margin-bottom:10px; color:var(--accent2);">🛒 Al vender en POS</h3>
+  <div class="code-block">
+<span class="cmt">// 1. Crear venta</span>
+<span class="kw">INSERT INTO</span> sales (source=<span class="str">'pos'</span>, total, payment_method_id, sale_date, is_credit=<span class="num">false</span>)
+
+<span class="cmt">// 2. Crear items</span>
+<span class="kw">INSERT INTO</span> sale_items (product_id, quantity, unit_price, unit_cost)
+
+<span class="cmt">// 3. Descontar inventario (si la receta está configurada)</span>
+<span class="kw">FOR EACH</span> recipe_ingredient <span class="kw">WHERE</span> product_id = vendido:
+  <span class="kw">UPDATE</span> ingredients <span class="kw">SET</span> stock_current -= (quantity * items_sold)
+
+<span class="cmt">// 4. Verificar alertas de stock bajo</span>
+<span class="kw">IF</span> stock_current <= stock_minimum → <span class="kw">NOTIFY</span> alerta_bajo_stock
+  </div>
+
+  <h3 style="margin-bottom:10px; color:var(--accent3);">🧾 Al registrar factura de compra</h3>
+  <div class="code-block">
+<span class="cmt">// 1. Crear compra con items</span>
+<span class="kw">INSERT INTO</span> purchases + purchase_items
+
+<span class="cmt">// 2. Para cada ingrediente comprado:</span>
+prev_cost = ingredients.cost_per_unit
+new_cost = purchase_item.total_cost / purchase_item.quantity
+<span class="kw">UPDATE</span> ingredients <span class="kw">SET</span>
+  stock_current += quantity,
+  cost_previous = prev_cost,
+  cost_per_unit = new_cost
+
+<span class="cmt">// 3. Alerta si el costo cambió</span>
+<span class="kw">IF</span> ABS(new_cost - prev_cost) / prev_cost > <span class="num">0.05</span>:  <span class="cmt">// más del 5%</span>
+  <span class="kw">NOTIFY</span> "El costo de [ingrediente] subió/bajó X%"
+
+<span class="cmt">// 4. Recalcular costo de todas las recetas que usan ese ingrediente</span>
+<span class="kw">FOR EACH</span> recipe_ingredient <span class="kw">WHERE</span> ingredient_id = comprado:
+  recalculate recipe.total_cost
+  update product.cost
+
+<span class="cmt">// 5. Crear gasto en Finanzas (tipo: purchase)</span>
+<span class="kw">INSERT INTO</span> expenses (type=<span class="str">'purchase'</span>, amount=total_factura, purchase_id)
+  </div>
+
+  <h3 style="margin-bottom:10px; color:var(--accent);">🏍️ Al importar Rappi xlsx</h3>
+  <div class="code-block">
+<span class="cmt">// 1. SheetJS lee hoja "Detalle" en el browser</span>
+<span class="cmt">// 2. Calcula totales</span>
+venta_bruta = SUM(rows["Venta Bruta"])
+comision = SUM(rows["Descuento de Producto asumido por el aliado"])
+tarifa = SUM(rows["Uso y alquiler de plataforma Rappi"])
+valor_neto = venta_bruta + comision + tarifa  <span class="cmt">// comision es negativo</span>
+best_day = rows.groupBy(dayOfWeek).max()
+
+<span class="cmt">// 3. Guardar importación</span>
+<span class="kw">INSERT INTO</span> rappi_imports (venta_bruta, comision_20pct, tarifa, valor_neto, best_day)
+
+<span class="cmt">// 4. Crear venta a CRÉDITO (productos cuentan, dinero no hasta pago)</span>
+<span class="kw">INSERT INTO</span> sales (source=<span class="str">'rappi'</span>, total=venta_bruta, is_credit=<span class="num">true</span>, credit_paid_at=<span class="num">null</span>)
+
+<span class="cmt">// 5. Crear gastos automáticos (comisiones y tarifas)</span>
+<span class="kw">INSERT INTO</span> expenses (type=<span class="str">'rappi_fee'</span>, description=<span class="str">'Comisión Rappi 20%'</span>, amount=comision)
+<span class="kw">INSERT INTO</span> expenses (type=<span class="str">'rappi_fee'</span>, description=<span class="str">'Tarifa plataforma Rappi'</span>, amount=tarifa)
+
+<span class="cmt">// 6. Cuando llega el pago (usuario lo marca):</span>
+<span class="kw">UPDATE</span> sales <span class="kw">SET</span> credit_paid_at = NOW()  <span class="cmt">// recién ahí entra a Finanzas</span>
+<span class="kw">UPDATE</span> rappi_imports <span class="kw">SET</span> paid_at = NOW()
+  </div>
+
+  <h3 style="margin-bottom:10px; color:var(--accent2);">📄 Al importar OlaClick xlsx</h3>
+  <div class="code-block">
+<span class="cmt">// 1. SheetJS lee hoja "Productos" (la más importante)</span>
+products_sheet = workbook["Productos"]
+
+<span class="cmt">// 2. Para cada producto en el xlsx</span>
+<span class="kw">FOR EACH</span> row in products_sheet:
+  <span class="cmt">// Buscar mapeo: olaclick_name → product local</span>
+  local_product = products.find(olaclick_name = row["Nombre de la variante de producto"])
+  
+  <span class="kw">IF</span> local_product found:
+    <span class="cmt">// Crear sale_items para estadísticas</span>
+    <span class="kw">INSERT INTO</span> sale_items (product_id, quantity=row["Cantidad vendida"], unit_price=row["Ganancia por unidad"])
+  <span class="kw">ELSE</span>:
+    <span class="cmt">// Mostrar UI: "Mapear producto: 'Tres Leches -' → ¿cuál producto tuyo?"</span>
+    flag_for_mapping(row["Nombre"])
+
+<span class="cmt">// 3. Leer hoja "Pagos" para cuadre de caja</span>
+<span class="kw">FOR EACH</span> row in pagos_sheet:
+  totals_by_method[row["Método de pago"]] += row["Monto total recibido"]
+
+<span class="cmt">// 4. Crear venta consolidada (source='olaclick')</span>
+<span class="kw">INSERT INTO</span> sales (source=<span class="str">'olaclick'</span>, total=SUM, is_credit=<span class="num">false</span>)
+  </div>
+</section>
+
+<!-- SPRINT PLAN -->
+<section>
+  <h2>07 · Plan de entrega 48 horas</h2>
+  <div class="sprint-grid">
+    <div class="sprint-card">
+      <div class="sprint-label"><span class="sprint-dot d1"></span> Día 1 — Cimientos + Core</div>
+      <ul class="task-list">
+        <li><span class="task-num">1.</span>Setup: Supabase proyecto, tablas completas, RLS, Auth</li>
+        <li><span class="task-num">2.</span>React + Vite + Tailwind + React Router — estructura de módulos</li>
+        <li><span class="task-num">3.</span>Módulo Productos: CRUD completo con categorías</li>
+        <li><span class="task-num">4.</span>Módulo Inventario: ingredientes, stock, edición, movimientos</li>
+        <li><span class="task-num">5.</span>Módulo Recetas: crear con ingredientes + sub-recetas, costeo automático</li>
+        <li><span class="task-num">6.</span>POS (Punto de Venta): carrito, cliente, método de pago, cobro</li>
+        <li><span class="task-num">7.</span>Descuento automático de inventario al vender</li>
+        <li><span class="task-num">8.</span>Alertas de stock bajo (badge en sidebar)</li>
+        <li><span class="task-num">9.</span>Dashboard básico: métricas del día</li>
+      </ul>
+    </div>
+    <div class="sprint-card">
+      <div class="sprint-label"><span class="sprint-dot d2"></span> Día 2 — Integraciones + Estadísticas</div>
+      <ul class="task-list">
+        <li><span class="task-num">10.</span>Módulo Importar OlaClick: parseo SheetJS, mapeo productos, cuadre de caja</li>
+        <li><span class="task-num">11.</span>Módulo Rappi: parseo, cálculo neto, gastos auto, crédito pendiente</li>
+        <li><span class="task-num">12.</span>Finanzas: ingresos, gastos, créditos, saldo por fondo</li>
+        <li><span class="task-num">13.</span>Factura de Compra: ingredientes + costo/g + alerta variación de precio</li>
+        <li><span class="task-num">14.</span>Estadísticas unificadas: ventas por producto, día semana, canal</li>
+        <li><span class="task-num">15.</span>Distribución de ingresos: fondos + % + dona visual</li>
+        <li><span class="task-num">16.</span>Arqueo de caja: apertura, cierre, diferencia, PDF</li>
+        <li><span class="task-num">17.</span>Clientes: CRUD con historial</li>
+        <li><span class="task-num">18.</span>Medios de pago configurables</li>
+        <li><span class="task-num">19.</span>Dashboard completo con gráficas Recharts</li>
+        <li><span class="task-num">20.</span>Deploy a Vercel + dominio</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="insight" style="margin-top:20px;">
+    <div class="insight-label">Estrategia de desarrollo con Claude Code</div>
+    <p>Usar <strong>mega-prompts modulares</strong> — un prompt por módulo, comenzando por la base de datos. Siempre incluir al final: <strong>"Sin pausar. Sin preguntar. Implementar completo."</strong> El orden importa: DB → Auth → Productos → Inventario → Recetas → POS → Importaciones → Estadísticas → Dashboard.</p>
+  </div>
+</section>
+
+<!-- MEGA PROMPT -->
+<section>
+  <h2>08 · Mega-prompt inicial para Claude Code</h2>
+
+  <div class="prompt-box">
+    <div class="prompt-title">Prompt 1 — Setup completo de Supabase (ejecutar primero)</div>
+    <div class="prompt-text">Eres un arquitecto de software senior. Crea el esquema completo de Supabase para RestoApp, una app de gestión de restaurante multi-canal.
+
+<strong>Crea estas tablas en PostgreSQL con RLS habilitado:</strong>
+
+restaurants (id uuid PK, name text, owner_id uuid FK auth.users, timezone text default 'America/Bogota', created_at timestamptz)
+
+products (id uuid PK, restaurant_id uuid FK, name text NOT NULL, category text, price numeric NOT NULL, cost numeric default 0, active boolean default true, olaclick_name text, created_at timestamptz)
+
+ingredients (id uuid PK, restaurant_id uuid FK, name text NOT NULL, unit text NOT NULL, stock_current numeric default 0, stock_minimum numeric default 0, cost_per_unit numeric default 0, cost_previous numeric default 0, supplier text, created_at timestamptz)
+
+recipes (id uuid PK, restaurant_id uuid FK, product_id uuid FK products nullable, is_sub_recipe boolean default false, name text NOT NULL, yield_quantity numeric default 1, yield_unit text, total_cost numeric default 0)
+
+recipe_ingredients (id uuid PK, recipe_id uuid FK, ingredient_id uuid FK ingredients nullable, sub_recipe_id uuid FK recipes nullable, quantity numeric NOT NULL, unit text NOT NULL)
+
+customers (id uuid PK, restaurant_id uuid FK, name text, phone text, address text, created_at timestamptz)
+
+payment_methods (id uuid PK, restaurant_id uuid FK, name text NOT NULL, active boolean default true)
+
+sales (id uuid PK, restaurant_id uuid FK, source text NOT NULL CHECK(source IN ('pos','olaclick','rappi')), customer_id uuid FK customers nullable, payment_method_id uuid FK payment_methods nullable, total numeric NOT NULL, discount numeric default 0, is_credit boolean default false, credit_paid_at timestamptz, sale_date date NOT NULL default CURRENT_DATE, notes text, created_at timestamptz)
+
+sale_items (id uuid PK, sale_id uuid FK, product_id uuid FK nullable, product_name text NOT NULL, quantity numeric NOT NULL, unit_price numeric NOT NULL, unit_cost numeric default 0, subtotal numeric NOT NULL)
+
+expenses (id uuid PK, restaurant_id uuid FK, type text NOT NULL CHECK(type IN ('simple','purchase','rappi_fee')), description text NOT NULL, amount numeric NOT NULL, fund text, expense_date date NOT NULL, purchase_id uuid nullable, created_at timestamptz)
+
+purchases (id uuid PK, restaurant_id uuid FK, supplier text, invoice_number text, total_amount numeric NOT NULL, purchase_date date NOT NULL, fund text)
+
+purchase_items (id uuid PK, purchase_id uuid FK, ingredient_id uuid FK, quantity numeric NOT NULL, unit text NOT NULL, total_cost numeric NOT NULL, cost_per_unit numeric NOT NULL, prev_cost_per_unit numeric)
+
+olaclick_imports (id uuid PK, restaurant_id uuid FK, file_name text, period_start date, period_end date, total_sales numeric, total_orders int, raw_products_json jsonb, raw_payments_json jsonb, imported_at timestamptz default now())
+
+rappi_imports (id uuid PK, restaurant_id uuid FK, period_start date, period_end date, venta_bruta numeric, comision_20pct numeric, tarifa_plataforma numeric, iva_retefuente numeric, valor_neto numeric, total_orders int, best_day_of_week text, credit_sale_id uuid FK sales nullable, paid_at timestamptz, imported_at timestamptz default now())
+
+income_distribution (id uuid PK, restaurant_id uuid FK, fund_name text NOT NULL, percentage numeric NOT NULL, color text, sort_order int)
+
+cash_registers (id uuid PK, restaurant_id uuid FK, register_date date NOT NULL, opening_cash numeric default 0, closing_cash numeric, sales_total numeric, expenses_total numeric, difference numeric, notes text, created_at timestamptz)
+
+inventory_movements (id uuid PK, restaurant_id uuid FK, ingredient_id uuid FK, type text CHECK(type IN ('entrada','salida','ajuste','produccion')), quantity numeric NOT NULL, notes text, created_at timestamptz)
+
+<strong>RLS policies:</strong> En cada tabla, crear policy que solo permita acceso donde restaurant_id está en los restaurants del usuario autenticado (auth.uid() = restaurants.owner_id).
+
+<strong>Datos iniciales para payment_methods:</strong> Insertar: Efectivo, Transferencia, Nequi, Daviplata, Tarjeta débito.
+
+Sin pausar. Sin preguntar. Implementar completo.</div>
+  </div>
+
+  <div class="prompt-box">
+    <div class="prompt-title">Prompt 2 — Estructura React completa (ejecutar después del DB)</div>
+    <div class="prompt-text">Crea la estructura completa de un proyecto React + Vite + Tailwind para RestoApp. 
+
+<strong>Estructura de archivos:</strong>
+src/
+  lib/supabase.js (cliente Supabase)
+  hooks/useRestaurant.js (contexto global restaurant_id)
+  pages/Dashboard.jsx
+  pages/POS.jsx
+  pages/Products.jsx
+  pages/Inventory.jsx
+  pages/Recipes.jsx
+  pages/Purchases.jsx
+  pages/Finance.jsx
+  pages/Statistics.jsx
+  pages/Distribution.jsx
+  pages/ImportOlaClick.jsx
+  pages/ImportRappi.jsx
+  pages/CashRegister.jsx
+  pages/Customers.jsx
+  pages/Settings.jsx
+  components/Layout.jsx (sidebar + navbar)
+  components/ui/ (Button, Modal, Card, Badge, Alert)
+
+<strong>Color scheme:</strong> dark sidebar (#1a1a2e), fondo claro (#f8f9ff), accent violeta (#7c6dfa), verde para positivos (#10b981), rojo para negativos (#ef4444).
+
+<strong>Sidebar items:</strong> Dashboard, Punto de Venta, Productos, Inventario, Recetas, Compras, Finanzas, Estadísticas, Distribución, Importar OlaClick, Reporte Rappi, Arqueo de Caja, Clientes, Configuración.
+
+<strong>Badge de alerta de stock bajo</strong> en el sidebar item de Inventario cuando hay ingredientes bajo el mínimo.
+
+Sin pausar. Sin preguntar. Implementar completo con React Router configurado.</div>
+  </div>
+</section>
+
+<!-- STATS INSIGHTS -->
+<section>
+  <h2>09 · Estadísticas a mostrar (basadas en datos reales)</h2>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+    <div class="insight teal">
+      <div class="insight-label">Panel OlaClick</div>
+      <p>
+        Ventas totales del período · Ventas por producto (tabla + barra) · <strong>Día más vendido</strong> (domingo $558K en abril) · Cuadre por método de pago (Transferencia vs Efectivo) · Ticket promedio ($40.247) · Totales para cuadre de caja
+      </p>
+    </div>
+    <div class="insight amber">
+      <div class="insight-label">Panel Rappi (separado)</div>
+      <p>
+        Bruto vs neto (después de descontar) · Total descontado como % del bruto · <strong>Día semana más vendido</strong> · Órdenes totales · Comparativo semana vs semana · Estado pago pendiente/recibido
+      </p>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Estadísticas unificadas (todos los canales)</div>
+      <p>
+        Ventas totales (POS + OlaClick + Rappi) · Gastos totales · Utilidad neta · Ventas por producto consolidado · Día de la semana más vendido (todos los canales) · Canal con más ventas · Evolución 30 días
+      </p>
+    </div>
+    <div class="insight teal">
+      <div class="insight-label">Finanzas</div>
+      <p>
+        Ingresos reales (sin créditos pendientes) + créditos Rappi separados · Gastos por fondo · Saldo por fondo · Utilidad neta real · <strong>Créditos Rappi pendientes de cobro</strong> con botón "Marcar como pagado"
+      </p>
+    </div>
+  </div>
+</section>
+
+<div style="border-top:1px solid var(--border); padding-top:24px; margin-top:24px; text-align:center; color:var(--muted); font-family:var(--mono); font-size:11px;">
+  RestoApp · Arquitectura v1.0 · Generado para Claude Code · 2 días de entrega
+</div>
+
+</body>
+</html>
