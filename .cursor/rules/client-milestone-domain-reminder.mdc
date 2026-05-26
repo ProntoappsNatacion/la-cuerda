@@ -1,0 +1,11 @@
+---
+description: Recordatorio de dominio al llegar a 5 clientes
+alwaysApply: true
+---
+
+# Recordatorio de clientes y dominio
+
+- Guardar este dato del proyecto: actualmente van `2` clientes.
+- El usuario quiere esperar a tener `5` clientes antes de comprar/configurar un dominio.
+- No empujar compra de dominio antes de ese hito, salvo que el usuario lo pida explícitamente.
+- Cuando en una conversación futura el conteo llegue a `5` clientes, recordar este pendiente y sugerir avanzar con el dominio.
